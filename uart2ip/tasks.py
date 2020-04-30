@@ -11,7 +11,8 @@ from . import conf
 from .ip import *
 
 wait_result = False
-lock = asyncio.Lock() # we use this lock to be sure that we don't read and write at the same time in the UART
+# we use a lock to be sure that we don't read and write at the same time in the UART
+lock = asyncio.Lock()
 
 class Error(Exception):
     pass
@@ -22,7 +23,8 @@ def start_tasks(args):
     queue = asyncio.Queue()
 
     try:
-        reader, writer = loop.run_until_complete(serial_asyncio.open_serial_connection(url=args.device, baudrate=115200))
+        reader, writer = loop.run_until_complete(
+            serial_asyncio.open_serial_connection(url=args.device, baudrate=115200))
     except:
         logging.error("No device connected to {}".format(args.device))
         return
@@ -53,42 +55,46 @@ async def exit():
 
 async def run_serial_task(reader, queue):
     logging.info("[serial] Initialized")
-    try:
-        while True:
-            async with lock:
-                try:
-                    # try to read header
-                    header = await asyncio.wait_for(reader.read(1), timeout=conf.SERIAL_TIMEOUT)
+    while True:
+        async with lock:
+            try:
+                # try to read header
+                header = await asyncio.wait_for(reader.read(1), timeout=conf.SERIAL_TIMEOUT)
 
-                    header = struct.unpack('!B', header)[0]
-                    header = Header(header)
+                header = struct.unpack('!B', header)[0]
+                header = Header(header)
 
-                    if header == Header.Result and not wait_result:
-                        raise Error("[serial] Received unexpected Result header")
+                if header == Header.Result and not wait_result:
+                    raise Error("[serial] Received unexpected Result header")
 
-                    logging.info("[serial] Received message with header {}".format(str(header)))
+                logging.info("[serial] Received message with header {}".format(str(header)))
 
-                    if header == Header.Result:
-                        msg = await ResultMessage.read(reader)
-                        await queue.put(msg)
+                if header == Header.Result:
+                    msg = await ResultMessage.read(reader)
+                    await queue.put(msg)
 
-                    elif header == Header.Command:
-                        msg = await CommandMessage.read_with_ip(reader)
-                        await msg.send()
+                elif header == Header.Command:
+                    msg = await CommandMessage.read_with_ip(reader)
+                    await msg.send()
 
-                    else:
-                        raise Error("[serial] I don't know what to do with {}".format(str(header)))
+                elif header == Header.ACK:
+                    await queue.put(True) # dummy val to unlock read_and_forward
 
-                    logging.info("[serial] Waiting for next message")
+                else:
+                    raise Error("[serial] I don't know what to do with {}".format(str(header)))
 
-                except asyncio.TimeoutError:
-                    # nothing to read
-                    #logging.debug("[serial] nothing to read, retrying after timeout..")
-                    pass
+                logging.info("[serial] Waiting for next message")
 
-            await asyncio.sleep(conf.SERIAL_TIMEOUT)
-    except Exception as e:
-        logging.error(e)
+            except asyncio.TimeoutError:
+                # nothing to read
+                #logging.debug("[serial] nothing to read, retrying after timeout..")
+                pass
+            except Exception as e:
+                logging.error(e)
+                break # close program
+
+        await asyncio.sleep(conf.SERIAL_TIMEOUT)
+
 
 
 async def run_network_task(serial_writer, queue, reader, writer):
@@ -99,7 +105,11 @@ async def run_network_task(serial_writer, queue, reader, writer):
     async with lock:
         logging.debug("[ip] got serial lock")
         try:
-            has_response = await asyncio.wait_for(read_and_forward(reader, serial_writer), timeout=conf.NETWORK_TIMEOUT)
+            has_response = await asyncio.wait_for(
+                        read_and_forward(reader, serial_writer, queue, lock),
+                        timeout=conf.NETWORK_TIMEOUT
+                        )
+
         except asyncio.TimeoutError:
             # too much time has passed
             logging.debug("[ip] timeout")
