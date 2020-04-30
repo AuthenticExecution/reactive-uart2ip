@@ -74,10 +74,7 @@ async def run_serial_task(reader, queue):
 
                     elif header == Header.Command:
                         msg = await CommandMessage.read_with_ip(reader)
-                        res = await msg.send()
-                        if res is not None:
-                            logging.warning("[ip] Error while sending the command")
-                            logging.debug(res)
+                        await msg.send()
 
                     else:
                         raise Error("[serial] I don't know what to do with {}".format(str(header)))
