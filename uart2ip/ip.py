@@ -22,6 +22,8 @@ async def read_and_forward(reader, writer, queue, lock):
 
         # write first bytes first (header + cmd + len)
         writer.write(packet[:5])
+        await writer.drain()
+        
         packet = packet[5:]
 
         packet_len = len(packet)
