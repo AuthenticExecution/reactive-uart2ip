@@ -8,7 +8,7 @@ import contextlib
 from reactivenet import ResultMessage, CommandMessage
 
 from . import conf
-from .ip import *
+from .ip import Header, read_and_forward
 
 wait_result = False
 # we use a lock to be sure that we don't read and write at the same time in the UART
@@ -24,14 +24,14 @@ def start_tasks(args):
 
     try:
         reader, writer = loop.run_until_complete(
-            serial_asyncio.open_serial_connection(url=args.device, baudrate=115200))
+            serial_asyncio.open_serial_connection(url=args.device, baudrate=conf.BAUD_RATE))
     except:
         logging.error("No device connected to {}".format(args.device))
         return
 
     serial_task = asyncio.ensure_future(run_serial_task(reader, queue))
 
-    server_func = functools.partial(run_network_task, writer, queue)
+    server_func = functools.partial(run_network_task, reader, writer, queue)
     server_task = asyncio.start_server(server_func, '0.0.0.0', args.port)
     loop.run_until_complete(server_task)
 
@@ -97,7 +97,7 @@ async def run_serial_task(reader, queue):
 
 
 
-async def run_network_task(serial_writer, queue, reader, writer):
+async def run_network_task(serial_reader, serial_writer, queue, reader, writer):
     global wait_result
 
     logging.info("[ip] New TCP connection")
@@ -106,7 +106,7 @@ async def run_network_task(serial_writer, queue, reader, writer):
         logging.debug("[ip] got serial lock")
         try:
             has_response = await asyncio.wait_for(
-                        read_and_forward(reader, serial_writer, queue, lock),
+                        read_and_forward(reader, serial_reader, serial_writer),
                         timeout=conf.NETWORK_TIMEOUT
                         )
 

@@ -13,17 +13,32 @@ class Header(IntEnum):
     ACK                 = 0x02
 
 
-async def read_and_forward(reader, writer, queue, lock):
+async def handshake(reader, writer):
+    # send handshake dummy byte
+    dummy = b'\xff'
+
+    writer.write(dummy)
+    await writer.drain()
+
+    res = await reader.read(1)
+
+    if dummy != res:
+        logging.warning("Handshake byte received is different!")
+
+
+async def read_and_forward(reader, serial_reader, serial_writer):
     try:
         header = struct.pack('!B', int(Header.Command))
         msg = await CommandMessage.read(reader)
 
         packet = header + msg.pack()
 
+        await handshake(serial_reader, serial_writer)
+
         # write first bytes first (header + cmd + len)
-        writer.write(packet[:5])
-        await writer.drain()
-        
+        serial_writer.write(packet[:5])
+        await serial_writer.drain()
+
         packet = packet[5:]
 
         packet_len = len(packet)
@@ -38,17 +53,16 @@ async def read_and_forward(reader, writer, queue, lock):
             else:
                 to_send = conf.UART_SEND_BYTES
 
-            logging.debug("Sending chunk of {} bytes".format(to_send))
+            #logging.debug("Sending chunk of {} bytes".format(to_send))
 
-            writer.write(packet[:to_send])
-            await writer.drain()
+            serial_writer.write(packet[:to_send])
+            await serial_writer.drain()
 
             packet_len -= to_send
             packet = packet[to_send:]
 
-            lock.release()
-            await queue.get()
-            await lock.acquire()
+            await serial_reader.read(1) # ack
+            await asyncio.sleep(0.1)
 
         return msg.has_response()
 

@@ -8,7 +8,7 @@ from . import conf
 def _set_parser():
     parser = argparse.ArgumentParser(description='Authentic Execution SGX')
     parser.add_argument('-l', '--loglevel', nargs='?', default=conf.DEFAULT_LOG_LEVEL, type=__log_level)
-    parser.add_argument('-d', '--device', required=False, default="/dev/ttyUSB1", help='Device path (e.g. /dev/ttyUSB1)')
+    parser.add_argument('-d', '--device', required=False, default=conf.DEFAULT_DEVICE, help='Device path (e.g. /dev/ttyUSB1)')
     parser.add_argument('-p', '--port', required=True, type=__int16bits, help='TCP port of the node')
 
     return parser
