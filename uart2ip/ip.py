@@ -20,7 +20,7 @@ async def handshake(reader, writer):
     writer.write(dummy)
     await writer.drain()
 
-    res = await reader.read(1)
+    res = await reader.readexactly(1)
 
     if dummy != res:
         logging.warning("Handshake byte received is different!")
@@ -61,7 +61,7 @@ async def read_and_forward(reader, serial_reader, serial_writer):
             packet_len -= to_send
             packet = packet[to_send:]
 
-            await serial_reader.read(1) # ack
+            await serial_reader.readexactly(1) # ack
             await asyncio.sleep(0.1)
 
         return msg.has_response()

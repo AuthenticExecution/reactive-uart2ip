@@ -59,7 +59,7 @@ async def run_serial_task(reader, queue):
         async with lock:
             try:
                 # try to read header
-                header = await asyncio.wait_for(reader.read(1), timeout=conf.SERIAL_TIMEOUT)
+                header = await asyncio.wait_for(reader.readexactly(1), timeout=conf.SERIAL_TIMEOUT)
 
                 header = struct.unpack('!B', header)[0]
                 header = Header(header)
