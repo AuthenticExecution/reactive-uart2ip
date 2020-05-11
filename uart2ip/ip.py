@@ -64,7 +64,11 @@ async def read_and_forward(reader, serial_reader, serial_writer):
             await serial_reader.readexactly(1) # ack
             await asyncio.sleep(0.1)
 
-        return msg.has_response()
+        # read cmd id
+        id = await serial_reader.readexactly(4)
+        id = struct.unpack(conf.CMD_ID_PACK, id)[0]
+
+        return msg.has_response(), id
 
     except Exception as e:
         # something went wrong
