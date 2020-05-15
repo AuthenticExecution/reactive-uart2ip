@@ -44,7 +44,7 @@ async def read_and_forward(reader, serial_reader, serial_writer):
         packet_len = len(packet)
         logging.debug("Data size (no header fields): {}".format(packet_len))
 
-        # we send only 64 bytes at a time due to limited UART RX buffer.
+        # we send only N bytes at a time due to limited UART RX buffer.
         # every time the device reads bytes from UART, it sends a dummy byte
         # as an "ACK"
         while packet_len > 0:
@@ -64,11 +64,7 @@ async def read_and_forward(reader, serial_reader, serial_writer):
             await serial_reader.readexactly(1) # ack
             await asyncio.sleep(0.1)
 
-        # read cmd id
-        id = await serial_reader.readexactly(4)
-        id = struct.unpack(conf.CMD_ID_PACK, id)[0]
-
-        return msg.has_response(), id
+        return msg.has_response()
 
     except Exception as e:
         # something went wrong
