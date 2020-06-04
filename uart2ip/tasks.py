@@ -29,7 +29,7 @@ def start_tasks(args):
     try:
         reader, writer = loop.run_until_complete(
             serial_asyncio.open_serial_connection(  url=args.device,
-                                                    baudrate=conf.BAUD_RATE))
+                                                    baudrate=args.baudrate))
     except:
         logging.error("No device connected to {}".format(args.device))
         return
