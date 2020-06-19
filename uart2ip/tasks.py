@@ -8,7 +8,7 @@ import contextlib
 from reactivenet import ResultMessage, CommandMessage
 
 from . import conf
-from .ip import Header, read_and_forward
+from .ip import Header, read_and_forward, get_handshake_header
 
 # we use this lock to be sure that we don't read and write at the same time in the UART
 serial_lock = asyncio.Lock()
@@ -64,9 +64,11 @@ async def run_serial_task(reader, queue):
         async with serial_lock:
             try:
                 # try to read header
-                header = await asyncio.wait_for(
-                                                    reader.readexactly(1),
-                                                    timeout=conf.SERIAL_TIMEOUT)
+                header = get_handshake_header()
+                if header is None:
+                    header = await asyncio.wait_for(
+                                                reader.readexactly(1),
+                                                timeout=conf.SERIAL_TIMEOUT)
 
                 header = struct.unpack('!B', header)[0]
                 header = Header(header)
@@ -106,10 +108,10 @@ async def run_network_task(serial_reader, serial_writer, queue, reader, writer):
         async with serial_lock:
             logging.debug("[ip] got serial lock")
             try:
-                has_response = await asyncio.wait_for(
-                            read_and_forward(reader, serial_reader, serial_writer),
-                            timeout=conf.NETWORK_TIMEOUT
-                            )
+                has_response = await asyncio.wait_for(read_and_forward(
+                            reader, serial_reader, serial_writer, serial_lock),
+                    timeout=conf.NETWORK_TIMEOUT
+                    )
 
             except asyncio.TimeoutError:
                 # too much time has passed

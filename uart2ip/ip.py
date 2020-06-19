@@ -7,33 +7,64 @@ from reactivenet import CommandMessage
 
 from . import conf
 
+handshake_header = None
+
 class Header(IntEnum):
     Result              = 0x00
     Command             = 0x01
     ACK                 = 0x02
 
 
-async def handshake(reader, writer):
+def get_handshake_header():
+    global handshake_header
+
+    if handshake_header is None:
+        return None
+
+    tmp = handshake_header
+    handshake_header = None
+
+    return tmp
+
+
+async def handshake(reader, writer, serial_lock):
+    global handshake_header
+
     # send handshake dummy byte
     dummy = b'\xff'
 
     writer.write(dummy)
     await writer.drain()
 
-    res = await reader.readexactly(1)
+    while True:
+        res = await reader.readexactly(1)
 
-    if dummy != res:
-        logging.warning("Handshake byte received is different!")
+        if dummy == res:
+            break
+
+        # If we are here, it means that we have read a byte belonging to another
+        # packet (a RemoteOutput sent from Sancus to the external world)
+        logging.debug("[ip] stopping handshake, there is an incoming packet from UART")
+        handshake_header = res
+
+        # release serial lock, and then wait until the serial task processes
+        # the incoming packet. after that (or, after all packets are read),
+        # we should receive the handshake response we were expecting
+        serial_lock.release()
+        while handshake_header is not None:
+            await asyncio.sleep(0.01)
+        await serial_lock.acquire()
+        logging.debug("[ip] resumed handshake")
 
 
-async def read_and_forward(reader, serial_reader, serial_writer):
+async def read_and_forward(reader, serial_reader, serial_writer, serial_lock):
     try:
         header = struct.pack('!B', int(Header.Command))
         msg = await CommandMessage.read(reader)
 
         packet = header + msg.pack()
 
-        await handshake(serial_reader, serial_writer)
+        await handshake(serial_reader, serial_writer, serial_lock)
 
         # write first bytes first (header + cmd + len)
         serial_writer.write(packet[:5])
