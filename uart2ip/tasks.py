@@ -97,7 +97,7 @@ async def run_serial_task(reader, queue):
                 logging.error(e)
                 break # close program
 
-        await asyncio.sleep(conf.SERIAL_TIMEOUT)
+        await asyncio.sleep(conf.SLEEP_TIME)
 
 
 

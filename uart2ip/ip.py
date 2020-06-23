@@ -52,7 +52,7 @@ async def handshake(reader, writer, serial_lock):
         # we should receive the handshake response we were expecting
         serial_lock.release()
         while handshake_header is not None:
-            await asyncio.sleep(0.01)
+            await asyncio.sleep(conf.SLEEP_TIME)
         await serial_lock.acquire()
         logging.debug("[ip] resumed handshake")
 
@@ -93,7 +93,7 @@ async def read_and_forward(reader, serial_reader, serial_writer, serial_lock):
             packet = packet[to_send:]
 
             await serial_reader.readexactly(1) # ack
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(conf.SLEEP_TIME)
 
         return msg.has_response()
 
