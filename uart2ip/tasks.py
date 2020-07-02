@@ -133,6 +133,10 @@ async def run_network_task(serial_reader, serial_writer, queue, reader, writer):
                 logging.warning("[ip] timeout")
 
         writer.close()
-        await writer.wait_closed()
+        try:
+            await writer.wait_closed()
+        except:
+            # old Python version
+            pass
 
         logging.info("[ip] Connection closed")
