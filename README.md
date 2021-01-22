@@ -7,16 +7,20 @@ Application that works as a "bridge" between the Sancus FPGA (through UART) and 
 ```bash
 # Install reactive-uart2ip - you must be in the root of this repository
 pip install .
-```
 
-## Usage
-
-```bash
 # run reactive-uart2ip
 ### <loglevel>: log level, e.g., "debug". Default "info"
 ### <device>: UART device. Default "/dev/ttyUSB1"
 ### <port>: port used by the app to listen for TCP connections
 reactive-uart2ip -l <loglevel> -d <device> -p <port>
+```
+
+## Run reactive-uart2ip with Docker
+
+```bash
+# Run the reactive-uart2ip Docker image
+### <loglevel>, <device> and <port> are the same as above
+make run LOG=<loglevel> DEVICE=<device> PORT=<port>
 ```
 
 ## How it works

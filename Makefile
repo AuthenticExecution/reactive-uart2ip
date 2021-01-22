@@ -1,6 +1,8 @@
 REPO=gianlu33/reactive-uart2ip
 TAG=latest
 
+LOG	?= info
+
 build:
 	docker build -t $(REPO):$(TAG) .
 
@@ -11,7 +13,7 @@ pull:
 	docker pull $(REPO):$(TAG)
 
 run: check_port check_device
-	docker run --network=host --device=$(DEVICE) --rm $(REPO):$(TAG) reactive-uart2ip -p $(PORT) -d $(DEVICE)
+	docker run --network=host --device=$(DEVICE) --rm $(REPO):$(TAG) reactive-uart2ip -p $(PORT) -d $(DEVICE) -l $(LOG)
 
 login:
 	docker login
