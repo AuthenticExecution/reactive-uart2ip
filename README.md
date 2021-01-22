@@ -2,21 +2,22 @@
 
 Application that works as a "bridge" between the Sancus FPGA (through UART) and an external client using TCP/IP. This is implemented with the specific purpose to handle Authentic Execution messages, hence this application is not "general purpose", but strongly dependent to the Sancus application running inside the FPGA.
 
-- See [reactive-tools]() and [sancus' reactive app](https://github.com/fritzalder/sancus-riot/tree/reactive-app/sancus-testbed/reactive)
-
 ## Installation
 
-Run `pip install .` from the root folder
+```bash
+# Install reactive-uart2ip - you must be in the root of this repository
+pip install .
+```
 
 ## Usage
 
-`reactive-uart2ip [-l <loglevel>] [-d <device>] -p <port>`
-
-- `loglevel`: set loglevel  (e.g. `debug`)
-  - Default: `info`
-- `device`: UART device path
-  - Default: `/dev/ttyUSB1`
-- `port`: Port where the application will listen for TCP connections
+```bash
+# run reactive-uart2ip
+### <loglevel>: log level, e.g., "debug". Default "info"
+### <device>: UART device. Default "/dev/ttyUSB1"
+### <port>: port used by the app to listen for TCP connections
+reactive-uart2ip -l <loglevel> -d <device> -p <port>
+```
 
 ## How it works
 
