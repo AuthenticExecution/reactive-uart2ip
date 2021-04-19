@@ -1,7 +1,7 @@
 REPO		?= gianlu33/reactive-uart2ip
 TAG			?= latest
 
-BACKUP	?= registry.rosetta.ericssondevops.com/gftl-er-5g-hosts/authentic-execution/fosdem-21-images/reactive-uart2ip:latest
+BACKUP	?= registry.rosetta.ericssondevops.com/gftl-er-5g-hosts/authentic-execution/fosdem-21-images/reactive-uart2ip
 
 LOG			?= info
 
@@ -12,8 +12,8 @@ push:
 	docker push $(REPO):$(TAG)
 
 push_backup:
-		docker tag $(REPO):$(TAG) $(BACKUP)
-		docker push $(BACKUP)
+		docker tag $(REPO):$(TAG) $(BACKUP):$(TAG)
+		docker push $(BACKUP):$(TAG)
 
 pull:
 	docker pull $(REPO):$(TAG)
