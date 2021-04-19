@@ -1,12 +1,12 @@
-REPO=gianlu33/reactive-uart2ip
-TAG=latest
+REPO	?= gianlu33/reactive-uart2ip
+TAG		?= latest
 
-LOG	?= info
+LOG		?= info
 
 build:
 	docker build -t $(REPO):$(TAG) .
 
-push: build login
+push:
 	docker push $(REPO):$(TAG)
 
 pull:
