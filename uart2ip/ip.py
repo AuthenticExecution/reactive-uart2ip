@@ -9,10 +9,11 @@ from . import conf
 
 handshake_header = None
 
+
 class Header(IntEnum):
-    Result              = 0x00
-    Command             = 0x01
-    ACK                 = 0x02
+    Result = 0x00
+    Command = 0x01
+    ACK = 0x02
 
 
 def get_handshake_header():
@@ -44,7 +45,8 @@ async def handshake(reader, writer, serial_lock):
 
         # If we are here, it means that we have read a byte belonging to another
         # packet (a RemoteOutput sent from Sancus to the external world)
-        logging.debug("[ip] stopping handshake, there is an incoming packet from UART")
+        logging.debug(
+            "[ip] stopping handshake, there is an incoming packet from UART")
         handshake_header = res
 
         # release serial lock, and then wait until the serial task processes
@@ -92,7 +94,7 @@ async def read_and_forward(reader, serial_reader, serial_writer, serial_lock):
             packet_len -= to_send
             packet = packet[to_send:]
 
-            await serial_reader.readexactly(1) # ack
+            await serial_reader.readexactly(1)  # ack
             await asyncio.sleep(conf.SLEEP_TIME)
 
         return msg.has_response()
