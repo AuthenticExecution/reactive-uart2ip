@@ -9,6 +9,6 @@ SERIAL_TIMEOUT = 0.001
 NETWORK_TIMEOUT = 10
 
 CMD_ID_SIZE = 4
-CMD_ID_PACK = '!I' # !Q for 8 bytes
+CMD_ID_PACK = '!I'  # !Q for 8 bytes
 
 UART_SEND_BYTES = 127

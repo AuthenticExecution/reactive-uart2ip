@@ -1,0 +1,26 @@
+name: Pypi
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch: # Allow manual triggering
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    -
+      uses: actions/checkout@master
+    -
+      name: code-check
+      run: |
+        sudo apt update && sudo apt install pylint
+        pip install -r requirements.txt
+        cd ..
+        pylint reactive-uart2ip --rcfile reactive-uart2ip/.pylintrc
+    -
+      name: publish
+      if: ${{ github.event_name != 'pull_request' }}
+      run: make upload PYPI_PASSWORD=${{ secrets.PYPI_TOKEN }}

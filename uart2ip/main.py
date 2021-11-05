@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from .initialization import _set_parser, _set_logging
@@ -12,7 +11,7 @@ def main(raw_args=None):
     _set_logging(args.loglevel)
 
     logging.info("Device: {} Baud: {} Port: {}".format(
-                args.device, args.baudrate, args.port
+        args.device, args.baudrate, args.port
     ))
 
     start_tasks(args)
