@@ -75,7 +75,7 @@ async def read_and_forward(reader, serial_reader, serial_writer, serial_lock):
         packet = packet[5:]
 
         packet_len = len(packet)
-        logging.debug("Data size (no header fields): {}".format(packet_len))
+        logging.debug(f"Data size (no header fields): {packet_len}")
 
         # we send only N bytes at a time due to limited UART RX buffer.
         # every time the device reads bytes from UART, it sends a dummy byte
@@ -85,8 +85,6 @@ async def read_and_forward(reader, serial_reader, serial_writer, serial_lock):
                 to_send = packet_len
             else:
                 to_send = conf.UART_SEND_BYTES
-
-            #logging.debug("Sending chunk of {} bytes".format(to_send))
 
             serial_writer.write(packet[:to_send])
             await serial_writer.drain()
@@ -101,5 +99,5 @@ async def read_and_forward(reader, serial_reader, serial_writer, serial_lock):
 
     except Exception as e:
         # something went wrong
-        logging.warning("[ip] Exception: {}".format(e))
+        logging.warning(f"[ip] Exception: {e}")
         return False

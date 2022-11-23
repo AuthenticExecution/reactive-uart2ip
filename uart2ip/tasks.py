@@ -31,7 +31,7 @@ def start_tasks(args):
             serial_asyncio.open_serial_connection(url=args.device,
                                                   baudrate=args.baudrate))
     except:
-        logging.error("No device connected to {}".format(args.device))
+        logging.error(f"No device connected to {args.device}")
         return
 
     serial_task = asyncio.ensure_future(run_serial_task(reader, queue))
@@ -52,7 +52,7 @@ def start_tasks(args):
 
 async def exit_app():
     logging.info("Exiting")
-    for task in asyncio.Task.all_tasks():
+    for task in asyncio.all_tasks():
         task.cancel()
         with contextlib.suppress(asyncio.CancelledError):
             await task
@@ -73,8 +73,7 @@ async def run_serial_task(reader, queue):
                 header = struct.unpack('!B', header)[0]
                 header = Header(header)
 
-                logging.info("[serial] Received message with header {}".
-                             format(str(header)))
+                logging.info(f"[serial] Received message with header {str(header)}")
 
                 if header == Header.Result:
                     msg = await ResultMessage.read(reader)
@@ -85,8 +84,7 @@ async def run_serial_task(reader, queue):
                     await msg.send()
 
                 else:
-                    raise Error("[serial] I don't know what to do with {}".
-                                format(str(header)))
+                    raise Error(f"[serial] I don't know what to do with {str(header)}")
 
                 logging.info("[serial] Waiting for next message")
 

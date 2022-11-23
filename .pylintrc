@@ -150,7 +150,17 @@ disable=print-statement,
         too-many-statements,
         logging-format-interpolation,
         global-statement,
-        bare-except
+        bare-except,
+        unspecified-encoding,
+        consider-using-with,
+        raise-missing-from,
+        logging-fstring-interpolation,
+        consider-using-enumerate,
+        no-self-use,
+        unused-argument,
+        consider-using-f-string,
+        import-error,
+        no-member
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

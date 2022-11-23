@@ -8,7 +8,7 @@ with open("requirements.txt", "r") as f:
 
 setup(
     name='reactive-uart2ip',
-    version='0.2',
+    version='0.2.1',
     author="Gianluca Scopelliti",
     author_email="gianlu.1033@gmail.com",
     description="TCP server that mediates UART serial communication",

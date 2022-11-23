@@ -10,9 +10,7 @@ def main(raw_args=None):
     args = parser.parse_args(raw_args)
     _set_logging(args.loglevel)
 
-    logging.info("Device: {} Baud: {} Port: {}".format(
-        args.device, args.baudrate, args.port
-    ))
+    logging.info(f"Device: {args.device} Baud: {args.baudrate} Port: {args.port}")
 
     start_tasks(args)
 
